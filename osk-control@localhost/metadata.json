@@ -1,0 +1,18 @@
+{
+  "name": "OSK Simple",
+  "description": "Minimal OSK helper: GNOME manages show/hide; bridge X11 focus and base state.",
+  "uuid": "osk-control@localhost",
+  "shell-version": [
+    "45",
+    "46",
+    "47",
+    "48",
+    "49",
+    "50",
+    "51"
+  ],
+  "session-modes": [
+    "user"
+  ],
+  "version": 1
+}
