@@ -171,6 +171,10 @@ export default class SimpleOskExtension extends Extension {
                 if (!a?._suggestions)
                     return;
                 a._suggestions.remove_all_children();
+                // 数字行的四周间距改成和键盘按键一样（GNOME .key-container
+                // 用 padding/spacing 4px；suggestion 行默认 12px 太远）。
+                a._suggestions.spacing = 2;
+                a._suggestions.style = 'padding: 4px; min-height: 0;';
                 // 像真实键盘数字行一样 1 2 3 4 5 6 7 8 9 0，
                 // 用 keyboard-key 样式类，外观和键盘按键一致。
                 for (let i = 1; i <= 10; i++) {
@@ -180,11 +184,47 @@ export default class SimpleOskExtension extends Extension {
                         label,
                         style_class: 'keyboard-key',
                     });
+                    // 主题里 .word-suggestions StButton 后定义，会把按键背景
+                    // 设成 transparent 并去掉立体阴影；用内联样式覆盖成真正的
+                    // 键盘按键外观：正方形、四角圆润、灰底白字、无底部阴影。
+                    // 颜色取自 GNOME 51 .keyboard-key 的 st-mix(#ffffff,#4d4d4d,9%)。
+                    btn.style = `
+                        background-color: #5d5d5d;
+                        color: #ffffff;
+                        font-size: 16px;
+                        font-weight: bold;
+                        border-radius: 0.546em;
+                        min-width: 48px;
+                        min-height: 48px;
+                        margin: 0;
+                        padding: 4px;
+                        box-shadow: none;
+                    `;
                     btn.connect('clicked', () => {
-                        try {
-                            IBusManager.getIBusManager()._panelService
-                                ?.candidate_clicked(idx, 1, 0);
-                        } catch (e) {}
+                        const ibm = IBusManager.getIBusManager();
+                        const cp = ibm?._candidatePopup;
+                        // 候选弹窗正在显示候选 → 点数字选对应候选（原有逻辑）
+                        if (cp?._candidateArea?.visible) {
+                            try {
+                                ibm._panelService?.candidate_clicked(idx, 1, 0);
+                            } catch (e) {}
+                            return;
+                        }
+                        // 没有候选 → 当作普通数字键：GNOME 原生走 handleVirtualKey
+                        // 让 IBus/Rime 处理，未被处理则退回真实虚拟设备 keyval。
+                        const keyval = label.charCodeAt(0); // '0'->0x30 ... '9'->0x39
+                        (async () => {
+                            try {
+                                const handled =
+                                    await Main.inputMethod.handleVirtualKey(keyval);
+                                if (!handled) {
+                                    const ctrl =
+                                        Main.keyboard.keyboardActor?._keyboardController;
+                                    ctrl?.keyvalPress(keyval);
+                                    ctrl?.keyvalRelease(keyval);
+                                }
+                            } catch (e) {}
+                        })();
                     });
                     a._suggestions.add_child(btn);
                 }

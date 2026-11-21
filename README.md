@@ -36,7 +36,7 @@ This extension **does not take over GNOME's native OSK show/hide logic**. It onl
 - **候选弹窗常显**：去掉 GNOME `ibusCandidatePopup.js` 里 `!Main.keyboard.visible` 的显示限制，OSK 弹出时仍显示拼音和候选词
 - **候选弹窗固定在输入框上方**：强制 `St.Side.BOTTOM`，并补上 GNOME `boxpointer.js` 缺失的 Y 方向 clamp，横屏也不挡键盘
 - **OSK 顶部固定数字行**：`1 2 3 4 5 6 7 8 9 0`，样式与真实键盘按键一致，候选词出现/消失时键盘**不再缩放**
-- **点数字选候选**：点击 OSK 数字键等价于物理数字键 `candidate_clicked`
+- **点数字选候选 / 输出数字**：有候选时点数字选对应候选；没有候选时就是普通数字键，和物理键盘一样输出数字
 - **禁止自动大写**：中文输入不会莫名锁 Shift
 
 - **Auto OSK on dock detach, off on attach** (detect `/sys/bus/usb/devices/1-7`)
@@ -45,7 +45,7 @@ This extension **does not take over GNOME's native OSK show/hide logic**. It onl
 - **Candidate popup always visible**: removes GNOME's `!Main.keyboard.visible` check in `ibusCandidatePopup.js`, so pinyin and candidates stay visible with OSK open
 - **Popup pinned above the input field**: forces `St.Side.BOTTOM` and adds the Y-axis clamp missing from GNOME's `boxpointer.js`, so it never covers the OSK in landscape
 - **Fixed number row on OSK**: `1 2 3 4 5 6 7 8 9 0`, styled like real keyboard keys; the keyboard **never resizes** when candidates appear/disappear
-- **Tap numbers to select candidates**: each OSK number calls `candidate_clicked`, just like the physical number keys
+- **Tap numbers to select candidates or type digits**: with candidates visible, a number selects the matching candidate; otherwise it behaves like a normal number key and types the digit
 - **No auto-capitalization**: Chinese input won't randomly lock Shift
 
 ## 适用环境 / Requirements
@@ -86,8 +86,8 @@ You can also download a ready-made zip from [Releases](https://github.com/newsqu
 
 ```bash
 gnome-extensions info osk-control@localhost
-# 应显示 OSK Simple / version 1 / ACTIVE
-# Should show OSK Simple / version 1 / ACTIVE
+# 应显示 OSK Simple / version 2 / ACTIVE
+# Should show OSK Simple / version 2 / ACTIVE
 
 grep -E 'enable osk-simple|number keys|candidate popup' /tmp/opencode/osk-simple.log | tail -10
 ```
