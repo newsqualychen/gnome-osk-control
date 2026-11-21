@@ -1,0 +1,30 @@
+name: Build Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build zip
+        run: |
+          zip -r "gnome-osk-control-${GITHUB_REF_NAME}.zip" \
+            osk-control@localhost README.md LICENSE
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            --title "GNOME OSK Control $GITHUB_REF_NAME" \
+            --generate-notes \
+            "gnome-osk-control-${GITHUB_REF_NAME}.zip"
